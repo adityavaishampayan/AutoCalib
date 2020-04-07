@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-# @file    wrapper.py
+# @file    camera_intrinsic_param.py
 # @Author  Aditya Vaishampayan (adityavaishampayan)
 # @copyright  MIT
-# @brief wrapper file for calling the functions in scripts folder
+# @brief file for estimating camera intrinsic matrix

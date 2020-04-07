@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-# @file    wrapper.py
+# @file    non_linear_optimization.py
 # @Author  Aditya Vaishampayan (adityavaishampayan)
 # @copyright  MIT
-# @brief wrapper file for calling the functions in scripts folder
+# @brief file for non linear geometric error minimization using scipy optimization

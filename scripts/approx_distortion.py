@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-# @file    wrapper.py
+# @file    approx_distortion.py
 # @Author  Aditya Vaishampayan (adityavaishampayan)
 # @copyright  MIT
-# @brief wrapper file for calling the functions in scripts folder
+# @brief Because we assumed that the camera has minimal distortion we can assume that kc=[0,0]T for a good initial estimate.
