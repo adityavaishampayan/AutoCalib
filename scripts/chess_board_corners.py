@@ -42,7 +42,8 @@ def get_camera_images():
     for each in images:
         yield (each, cv2.imread(each, 0))
 
-def getChessboardCorners(images=None, visualize=False):
+
+def getChessboardCorners(images=None, visualize=True):
 
     objp = np.zeros((PATTERN_SIZE[1] * PATTERN_SIZE[0], 3), np.float32)
     objp[:, :2] = np.mgrid[0:9, 0:6].T.reshape(-1, 2)
