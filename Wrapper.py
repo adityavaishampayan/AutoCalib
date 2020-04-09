@@ -24,3 +24,23 @@ SOFTWARE.
 # @Author  Aditya Vaishampayan (adityavaishampayan)
 # @copyright  MIT
 # @brief wrapper file for calling the functions in scripts folder
+
+
+import os
+import glob
+import sys, argparse
+import pprint
+import numpy as np
+import cv2
+from scipy import optimize as opt
+
+from scripts.chess_board_corners import getChessboardCorners
+
+
+if __name__ == '__main__':
+
+    chessboard_correspondences = getChessboardCorners(images=None, visualize = True)
+
+
+
+
