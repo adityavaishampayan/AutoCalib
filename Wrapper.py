@@ -35,11 +35,18 @@ import cv2
 from scipy import optimize as opt
 
 from scripts.chess_board_corners import getChessboardCorners
+from scripts.normlaize import normalize_points
+
+
+def main():
+    chessboard_correspondences = getChessboardCorners(images=None, visualize = True)
+
+    chessboard_correspondences_normalized = normalize_points(chessboard_correspondences)
+
 
 
 if __name__ == '__main__':
-
-    chessboard_correspondences = getChessboardCorners(images=None, visualize = True)
+    main()
 
 
 
