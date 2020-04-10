@@ -20,39 +20,37 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-# @file    wrapper.py
+# @file    homography_refined.py
 # @Author  Aditya Vaishampayan (adityavaishampayan)
 # @copyright  MIT
-# @brief wrapper file for calling the functions in scripts folder
+# @brief file for refining the homography values
 
-
-import os
-import glob
-import sys, argparse
-import pprint
 import numpy as np
-import cv2
 from scipy import optimize as opt
 
-from scripts.chess_board_corners import getChessboardCorners
-from scripts.normalise_coorespondances import normalize_points
-from scripts.homography import compute_view_based_homography
-from scripts.homography_refined import refine_homographies
+from scripts.jacobian import jac_function
+from scripts.minimizer import minimizer_func
 
+def refine_homographies(H, correspondences, skip=False):
+    if skip:
+        return H
 
-def main():
-    chessboard_correspondences = getChessboardCorners(images=None, visualize = True)
+    image_points = correspondences[0]
+    object_points = correspondences[1]
+    normalized_image_points = correspondences[2]
+    normalized_object_points = correspondences[3]
+    N_u = correspondences[4]
+    N_x = correspondences[5]
+    N_u_inv = correspondences[6]
+    N_x_inv = correspondences[7]
 
-    chessboard_correspondences_normalized = normalize_points(chessboard_correspondences)
+    N = normalized_object_points.shape[0]
+    X = object_points.flatten()
+    Y = image_points.flatten()
+    h = H.flatten()
+    h_prime = opt.least_squares(fun=minimizer_func, x0=h, jac=jac_function, method="lm", args=[X, Y, h, N], verbose=0)
 
-    H = []
-    for correspondence in chessboard_correspondences_normalized:
-        H.append(compute_view_based_homography(correspondence, reproj=0))
-
-
-if __name__ == '__main__':
-    main()
-
-
-
-
+    if h_prime.success:
+        H = h_prime.x.reshape(3, 3)
+    H = H / H[2, 2]
+    return H

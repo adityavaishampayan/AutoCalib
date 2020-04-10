@@ -20,39 +20,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-# @file    wrapper.py
+# @file    jacobian.py
 # @Author  Aditya Vaishampayan (adityavaishampayan)
 # @copyright  MIT
-# @brief wrapper file for calling the functions in scripts folder
+# @brief file for obtaining the jacobian of the initial guess
 
-
-import os
-import glob
-import sys, argparse
-import pprint
 import numpy as np
-import cv2
-from scipy import optimize as opt
 
-from scripts.chess_board_corners import getChessboardCorners
-from scripts.normalise_coorespondances import normalize_points
-from scripts.homography import compute_view_based_homography
-from scripts.homography_refined import refine_homographies
+def jac_function(initial_guess, X, Y, h, N):
+    x_j = X.reshape(N, 2)
+    jacobian = np.zeros( (2*N, 9) , np.float64)
+    for j in range(N):
+        x, y = x_j[j]
+        sx = np.float64(h[0]*x + h[1]*y + h[2])
+        sy = np.float64(h[3]*x + h[4]*y + h[5])
+        w = np.float64(h[6]*x + h[7]*y + h[8])
+        jacobian[2*j] = np.array([x/w, y/w, 1/w, 0, 0, 0, -sx*x/w**2, -sx*y/w**2, -sx/w**2])
+        jacobian[2*j + 1] = np.array([0, 0, 0, x/w, y/w, 1/w, -sy*x/w**2, -sy*y/w**2, -sy/w**2])
 
-
-def main():
-    chessboard_correspondences = getChessboardCorners(images=None, visualize = True)
-
-    chessboard_correspondences_normalized = normalize_points(chessboard_correspondences)
-
-    H = []
-    for correspondence in chessboard_correspondences_normalized:
-        H.append(compute_view_based_homography(correspondence, reproj=0))
-
-
-if __name__ == '__main__':
-    main()
-
-
-
-
+    return jacobian
