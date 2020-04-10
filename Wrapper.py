@@ -35,7 +35,8 @@ import cv2
 from scipy import optimize as opt
 
 from scripts.chess_board_corners import getChessboardCorners
-from scripts.normlaize import normalize_points
+from scripts.normalise_coorespondances import normalize_points
+from scripts.homography import compute_view_based_homography
 
 
 def main():
@@ -43,6 +44,9 @@ def main():
 
     chessboard_correspondences_normalized = normalize_points(chessboard_correspondences)
 
+    H = []
+    for correspondence in chessboard_correspondences_normalized:
+        H.append(compute_view_based_homography(correspondence, reproj=0))
 
 
 if __name__ == '__main__':
