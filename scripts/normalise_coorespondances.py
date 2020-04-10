@@ -23,54 +23,82 @@ SOFTWARE.
 # @file    normalise_coorespondances.py
 # @Author  Aditya Vaishampayan (adityavaishampayan)
 # @copyright  MIT
-# @brief wrapper file for normalising the corresponding object and image points of the chessboard
+# @brief file for normalising the corresponding object and image points of the chessboard
 
 import numpy as np
 
 
-def get_normalization_matrix(pts, name="A"):
+def get_normalization_matrix(pts: object, name: object = "A") -> object:
+    """
+    A function to obtain the normalisation matrix
+    :param pts: points whose normalisation matrix needs to be obtained
+    :param name: name of the points e.g. objects points or image points
+    :return: normalisation and inverse normalisation matrix
+    """
+    # changing the type of points
     pts = pts.astype(np.float64)
+
+    # obtaining the mean of the points
     x_mean, y_mean = np.mean(pts, axis=0)
-    var_x, var_y = np.var(pts, axis=0)
+    print("x mean: ", x_mean)
+    print("y mean: ", y_mean)
 
-    s_x, s_y = np.sqrt(2 / var_x), np.sqrt(2 / var_y)
+    # obtaining the variance of the points
+    x_var, y_var = np.var(pts, axis=0)
+    print("variance in x: ", x_var)
+    print("variance in y: ", y_var)
 
-    print("Matrix: {4} : meanx {0}, meany {1}, varx {2}, vary {3}, sx {5}, sy {6} ".format(x_mean, y_mean, var_x,
-                                                                                           var_y, name, s_x, s_y))
+    # scaling the points so that the average distance of the points from the origin is equal to sqrt(2)
+    s_x = np.sqrt(2 / x_var)
+    s_y = np.sqrt(2 / y_var)
+    print("standard deviation in x: ", s_x)
+    print("standard deviation in y: ", s_y)
 
-    n = np.array([[s_x, 0, -s_x * x_mean], [0, s_y, -s_y * y_mean], [0, 0, 1]])
-    # print(n)
+    # normalisation matrix as shown in eq 181 pg 27 of the paper Burger – Zhang’s Camera Calibration Algorithm
+    n_matrix = np.array([[s_x,   0,  -s_x * x_mean],
+                         [0,   s_y,  -s_y * y_mean],
+                         [0,     0,              1]])
 
-    n_inv = np.array([[1. / s_x, 0, x_mean], [0, 1. / s_y, y_mean], [0, 0, 1]])
-    return n.astype(np.float64), n_inv.astype(np.float64)
+    # inverse of normalisation matrix as shown in eq 181 pg 27 of the paper Burger – Zhang’s Camera Calibration
+    # Algorithm
+    n_matrix_inv = np.array([[1.0/s_x,     0,          x_mean],
+                             [0,            1.0/s_y,   y_mean],
+                             [0,            0,              1]])
+
+    return n_matrix.astype(np.float64), n_matrix_inv.astype(np.float64)
 
 
-def normalize_points(chessboard_correspondences):
-    views = len(chessboard_correspondences)
+def normalize_points(chessboard_correspondences: object) -> object:
+    """
+    a function to normalise the correspondences of image and object points
+    :param chessboard_correspondences: corresponding points
+    :return:
+    """
 
     ret_correspondences = []
-    for i in range(views):
-        imp, objp = chessboard_correspondences[i]
-        N_x, N_x_inv = get_normalization_matrix(objp, "A")
-        N_u, N_u_inv = get_normalization_matrix(imp, "B")
-        # print(N_x)
-        # print(N_u)
-        # convert imp, objp to homogeneous
-        # hom_imp = np.array([np.array([[each[0]], [each[1]], [1.0]]) for each in imp])
-        # hom_objp = np.array([np.array([[each[0]], [each[1]], [1.0]]) for each in objp])
-        hom_imp = np.array([[[each[0]], [each[1]], [1.0]] for each in imp])
-        hom_objp = np.array([[[each[0]], [each[1]], [1.0]] for each in objp])
 
-        normalized_hom_imp = hom_imp
-        normalized_hom_objp = hom_objp
+    for i in range(len(chessboard_correspondences)):
+
+        image_points, object_points = chessboard_correspondences[i]
+
+        # image points
+        homogenous_image_pts = np.array([[[pt[0]], [pt[1]], [1.0]] for pt in image_points])
+        normalized_hom_imp = homogenous_image_pts
+        n_matrix_imp, n_matrix_imp_inv = get_normalization_matrix(image_points, "image points")
+
+        # object points
+        homogenous_object_pts = np.array([[[pt[0]], [pt[1]], [1.0]] for pt in object_points])
+        normalized_hom_objp = homogenous_object_pts
+        n_matrix_obp, n_matrix_obp_inv = get_normalization_matrix(object_points, "object points")
 
         for i in range(normalized_hom_objp.shape[0]):
-            # 54 points. iterate one by onea
-            # all points are homogeneous
-            n_o = np.matmul(N_x, normalized_hom_objp[i])
+
+            # normalising the object points by multiplying with normalisation matrix
+            n_o = np.matmul(n_matrix_obp, normalized_hom_objp[i])
             normalized_hom_objp[i] = n_o / n_o[-1]
 
-            n_u = np.matmul(N_u, normalized_hom_imp[i])
+            # normalising the image points by multiplying with normalisation matrix
+            n_u = np.matmul(n_matrix_imp, normalized_hom_imp[i])
             normalized_hom_imp[i] = n_u / n_u[-1]
 
         normalized_objp = normalized_hom_objp.reshape(normalized_hom_objp.shape[0], normalized_hom_objp.shape[1])
@@ -79,8 +107,7 @@ def normalize_points(chessboard_correspondences):
         normalized_objp = normalized_objp[:, :-1]
         normalized_imp = normalized_imp[:, :-1]
 
-        # print(normalized_imp)
-
-        ret_correspondences.append((imp, objp, normalized_imp, normalized_objp, N_u, N_x, N_u_inv, N_x_inv))
+        ret_correspondences.append((image_points, object_points, normalized_imp, normalized_objp, n_matrix_imp,
+                                    n_matrix_obp, n_matrix_imp_inv, n_matrix_obp_inv))
 
     return ret_correspondences

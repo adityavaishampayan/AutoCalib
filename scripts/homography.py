@@ -28,72 +28,48 @@ SOFTWARE.
 import numpy as np
 
 
-def compute_view_based_homography(correspondence, reproj=False):
-    """
-    correspondence = (imp, objp, normalized_imp, normalized_objp, N_u, N_x, N_u_inv, N_x_inv)
-    """
-    image_points = correspondence[0]
-    object_points = correspondence[1]
-    normalized_image_points = correspondence[2]
-    normalized_object_points = correspondence[3]
-    N_u = correspondence[4]
-    N_x = correspondence[5]
+def compute_view_based_homography(correspondence):
+
     N_u_inv = correspondence[6]
-    N_x_inv = correspondence[7]
-
-    N = len(image_points)
-    print("Number of points in current view : ", N)
-
+    norm_img_pts = correspondence[2]
+    img_pts = correspondence[0]
+    obj_pts = correspondence[1]
+    norm_obj_pts = correspondence[3]
+    N_x = correspondence[5]
+    N = len(img_pts)
     M = np.zeros((2 * N, 9), dtype=np.float64)
-    print("Shape of Matrix M : ", M.shape)
 
-    print("N_model\n", N_x)
-    print("N_observed\n", N_u)
+    for i in range(len(img_pts)):
+        # obtaining the normalised image points
+        u, v = norm_img_pts[i]
+        # obtaining the normalised object points
+        x, y = norm_obj_pts[i]
+        r1 = np.array([-x, -y, -1, 0, 0, 0, x * u, y * u, u])
+        r2 = np.array([0, 0, 0, -x, -y, -1, x * v, y * v, v])
+        M[2 * i] = r1
+        M[(2 * i) + 1] = r2
 
-    # create row wise allotment for each 0-2i rows
-    # that means 2 rows..
-    for i in range(N):
-        X, Y = normalized_object_points[i]  # A
-        u, v = normalized_image_points[i]  # B
+    # M.h  = 0 . Solve the homogeneous system (e. g. by singular value decomposition):
+    u, s, v_h = np.linalg.svd(M)
 
-        row_1 = np.array([-X, -Y, -1, 0, 0, 0, X * u, Y * u, u])
-        row_2 = np.array([0, 0, 0, -X, -Y, -1, X * v, Y * v, v])
-        M[2 * i] = row_1
-        M[(2 * i) + 1] = row_2
-
-        print("p_model {0} \t p_obs {1}".format((X, Y), (u, v)))
-
-    # M.h  = 0 . solve system of linear equations using SVD
-    u, s, vh = np.linalg.svd(M)
-    print("Computing SVD of M")
-    # print("U : Shape {0} : {1}".format(u.shape, u))
-    # print("S : Shape {0} : {1}".format(s.shape, s))
-    # print("V_t : Shape {0} : {1}".format(vh.shape, vh))
-    # print(s, np.argmin(s))
-
-    h_norm = vh[np.argmin(s)]
+    # obtaining the minimum eigen value
+    h_norm = v_h[np.argmin(s)]
     h_norm = h_norm.reshape(3, 3)
-    # print("Normalized Homography Matrix : \n" , h_norm)
-    print(N_u_inv)
-    print(N_x)
-    # h = h_norm
+
+    # de normalize equation 68 of Burger – Zhang’s Camera Calibration Algorithm
     h = np.matmul(np.matmul(N_u_inv, h_norm), N_x)
 
     # if abs(h[2, 2]) > 10e-8:
     h = h[:, :] / h[2, 2]
 
-    print("Homography for View : \n", h)
+    reprojection_error = 0
+    for i in range(len(img_pts)):
+        t1 = np.array([[obj_pts[i][0]], [obj_pts[i][1]], [1.0]])
+        t = np.matmul(h, t1).reshape(1, 3)
+        t = t / t[0][-1]
+        reprojection_error += np.sum(np.abs(img_pts[i] - t[0][:-1]))
 
-    if reproj:
-        reproj_error = 0
-        for i in range(len(image_points)):
-            t1 = np.array([[object_points[i][0]], [object_points[i][1]], [1.0]])
-            t = np.matmul(h, t1).reshape(1, 3)
-            t = t / t[0][-1]
-            formatstring = "Imp {0} | ObjP {1} | Tx {2}".format(image_points[i], object_points[i], t)
-            print(formatstring)
-            reproj_error += np.sum(np.abs(image_points[i] - t[0][:-1]))
-        reproj_error = np.sqrt(reproj_error / N) / 100.0
-        print("Reprojection error : ", reproj_error)
+    reprojection_error = np.sqrt(reprojection_error / N)
+    print("Reprojection error : ", reprojection_error)
 
     return h

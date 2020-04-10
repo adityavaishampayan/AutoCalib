@@ -36,15 +36,12 @@ def minimizer_func(initial_guess, X, Y, h, N):
     # N : number of points
     #
     x_j = X.reshape(N, 2)
-    # Y = Y.reshape(N, 2)
-    # h = h.reshape(3, 3)
+
     projected = [0 for i in range(2*N)]
     for j in range(N):
         x, y = x_j[j]
         w = h[6]*x + h[7]*y + h[8]
-        # pts = np.matmul(np.array([ [h[0], h[1], h[2]] , [h[3], h[4], h[5]]]), np.array([ [x] , [y] , [1.]]))
-        # pts = pts/float(w)
-        # u, v = pts[0][0], pts[1][0]
+
         projected[2*j] = (h[0] * x + h[1] * y + h[2]) / w
         projected[2*j + 1] = (h[3] * x + h[4] * y + h[5]) / w
 

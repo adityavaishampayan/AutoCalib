@@ -33,20 +33,28 @@ from scripts.camera_intrinsic_param import get_intrinsic_parameters
 
 
 def main():
+
+    # obtaining the chessboard correspondences between object points and image points
     chessboard_correspondences = getChessboardCorners(images=None, visualize = True)
 
+    # Normalizing the chessboard points for better results of homography
     chessboard_correspondences_normalized = normalize_points(chessboard_correspondences)
 
-    H = []
+    # obtaining homography
+    homography = []
     for correspondence in chessboard_correspondences_normalized:
-        H.append(compute_view_based_homography(correspondence, reproj=1))
+        homography.append(compute_view_based_homography(correspondence))
 
-    H_r = []
-    for i in range(len(H)):
-        h_opt = refine_homographies(H[i], chessboard_correspondences_normalized[i], skip=False)
-        H_r.append(h_opt)
+    # refining the obtsined homography
+    homography_refined = []
+    for i in range(len(homography)):
+        h_opt = refine_homographies(homography[i], chessboard_correspondences_normalized[i], skip=False)
+        homography_refined.append(h_opt)
 
-    A = get_intrinsic_parameters(H_r)
+    # obtaining the calibration matrix
+    K = get_intrinsic_parameters(homography_refined)
+
+    print("camera calibration matrix: ", K)
 
 
 if __name__ == '__main__':

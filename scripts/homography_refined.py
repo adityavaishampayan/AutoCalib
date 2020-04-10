@@ -38,12 +38,7 @@ def refine_homographies(H, correspondences, skip=False):
 
     image_points = correspondences[0]
     object_points = correspondences[1]
-    normalized_image_points = correspondences[2]
     normalized_object_points = correspondences[3]
-    N_u = correspondences[4]
-    N_x = correspondences[5]
-    N_u_inv = correspondences[6]
-    N_x_inv = correspondences[7]
 
     N = normalized_object_points.shape[0]
     X = object_points.flatten()
