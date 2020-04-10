@@ -25,19 +25,11 @@ SOFTWARE.
 # @copyright  MIT
 # @brief wrapper file for calling the functions in scripts folder
 
-
-import os
-import glob
-import sys, argparse
-import pprint
-import numpy as np
-import cv2
-from scipy import optimize as opt
-
 from scripts.chess_board_corners import getChessboardCorners
 from scripts.normalise_coorespondances import normalize_points
 from scripts.homography import compute_view_based_homography
 from scripts.homography_refined import refine_homographies
+from scripts.camera_intrinsic_param import get_intrinsic_parameters
 
 
 def main():
@@ -47,7 +39,14 @@ def main():
 
     H = []
     for correspondence in chessboard_correspondences_normalized:
-        H.append(compute_view_based_homography(correspondence, reproj=0))
+        H.append(compute_view_based_homography(correspondence, reproj=1))
+
+    H_r = []
+    for i in range(len(H)):
+        h_opt = refine_homographies(H[i], chessboard_correspondences_normalized[i], skip=False)
+        H_r.append(h_opt)
+
+    A = get_intrinsic_parameters(H_r)
 
 
 if __name__ == '__main__':

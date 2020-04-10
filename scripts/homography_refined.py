@@ -31,6 +31,7 @@ from scipy import optimize as opt
 from scripts.jacobian import jac_function
 from scripts.minimizer import minimizer_func
 
+
 def refine_homographies(H, correspondences, skip=False):
     if skip:
         return H
