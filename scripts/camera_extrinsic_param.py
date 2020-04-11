@@ -24,3 +24,31 @@ SOFTWARE.
 # @Author  Aditya Vaishampayan (adityavaishampayan)
 # @copyright  MIT
 # @brief file for estimating camera extrinsic matrix
+import numpy as np
+
+def estimateExtrinsicParams(K, H):
+    K_inv = np.linalg.inv(K)
+
+    # Rotation vectors
+
+    r1 = np.dot(K_inv, H[:, 0])
+    lamda = np.linalg.norm(r1, ord=2)
+    r1 = r1 / lamda
+
+    r2 = np.dot(K_inv, H[:, 1])
+    r2 = r2 / lamda
+
+    r3 = np.cross(r1, r2)
+
+    # Translation vectors
+
+    t = np.dot(K_inv, H[:, 2]) / lamda
+
+    R = np.asarray([r1, r2, r3])
+    R = R.T
+
+    extrinsic = np.zeros((3, 4))
+    extrinsic[:, :-1] = R
+    extrinsic[:, -1] = t
+
+    return extrinsic

@@ -30,6 +30,9 @@ from scripts.normalise_coorespondances import normalize_points
 from scripts.homography import compute_view_based_homography
 from scripts.homography_refined import h_refined
 from scripts.camera_intrinsic_param import get_intrinsic_parameters
+from scripts.camera_extrinsic_param import estimateExtrinsicParams
+from scripts.approx_distortion import *
+import glob
 
 
 def main():
@@ -53,8 +56,28 @@ def main():
 
     # obtaining the calibration matrix
     K = get_intrinsic_parameters(homography_refined)
-
     print("camera calibration matrix: ", K)
+
+    extrinsic_para = []
+    for i in range(len(homography_refined)):
+        extrinsic = estimateExtrinsicParams(K, homography_refined[i])
+        extrinsic_para.append(extrinsic)
+        print("extrinsic params: ", extrinsic)
+
+    optpoints = []
+    for i in range(len(chessboard_correspondences)):
+        image_points, object_points = chessboard_correspondences[i]
+        points = estimateReprojectionErrorDistortion(K, extrinsic_para[i], image_points, object_points)
+        optpoints.append(points)
+
+    optpoints = np.array(optpoints)
+    DATA_DIR = r'/home/aditya/hw2/AutoCalib/dataset/Calibration_Imgs/'
+
+    images = [each for each in glob.glob(DATA_DIR + "*.jpg")]
+    images = sorted(images)
+    for i in range(len(optpoints)):
+        image_points, object_points = chessboard_correspondences[i]
+        visualizePoints(image_points, optpoints, images[i],i)
 
 
 if __name__ == '__main__':
