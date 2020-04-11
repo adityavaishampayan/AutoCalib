@@ -23,3 +23,9 @@ tangential distortion occurs because the image-taking lense is not aligned perfe
  Extrinsic parameters corresponds to rotation and translation vectors which translates a coordinates of a 3D point to a coordinate system.
 
 For stereo applications, these distortions need to be corrected first. To find these parameters, we must provide some sample images of a well defined pattern (e.g. a chess board). We find some specific points of which we already know the relative positions (e.g. square corners in the chess board). We know the coordinates of these points in real world space and we know the coordinates in the image, so we can solve for the distortion coefficients. For better results, we need at least 10 test patterns.
+
+# Calibration matrix
+
+camera calibration matrix:  [[ 2.05759563e+03 -6.68390012e-01  7.64017398e+02]
+ [ 0.00000000e+00  2.04457744e+03  1.36076094e+03]
+ [ 0.00000000e+00  0.00000000e+00  1.00000000e+00]]
