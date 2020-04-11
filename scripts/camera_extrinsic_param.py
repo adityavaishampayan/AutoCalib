@@ -23,30 +23,28 @@ SOFTWARE.
 # @file    camera_extrinsic_param.py
 # @Author  Aditya Vaishampayan (adityavaishampayan)
 # @copyright  MIT
-# @brief file for estimating camera extrinsic matrix
+# @brief file for estimating camera extrinsic parameters
 import numpy as np
 
+
 def estimateExtrinsicParams(K, H):
-    K_inv = np.linalg.inv(K)
+    """
+    a function for estimating the camera extrinsic parameters
+    :param K: calibration matrix K
+    :param H: homogrpahy
+    :return: extrinsic matrix containing r and t
+    """
+    inv_k = np.linalg.inv(K)
+    rot_1 = np.dot(inv_k, H[:, 0])
+    lamda = np.linalg.norm(rot_1, ord=2)
 
-    # Rotation vectors
-
-    r1 = np.dot(K_inv, H[:, 0])
-    lamda = np.linalg.norm(r1, ord=2)
-    r1 = r1 / lamda
-
-    r2 = np.dot(K_inv, H[:, 1])
-    r2 = r2 / lamda
-
-    r3 = np.cross(r1, r2)
-
-    # Translation vectors
-
-    t = np.dot(K_inv, H[:, 2]) / lamda
-
-    R = np.asarray([r1, r2, r3])
+    rot_1 = rot_1 / lamda
+    rot_2 = np.dot(inv_k, H[:, 1])
+    rot_2 = rot_2 / lamda
+    rot_3 = np.cross(rot_1, rot_2)
+    t = np.dot(inv_k, H[:, 2]) / lamda
+    R = np.asarray([rot_1, rot_2, rot_3])
     R = R.T
-
     extrinsic = np.zeros((3, 4))
     extrinsic[:, :-1] = R
     extrinsic[:, -1] = t

@@ -28,11 +28,12 @@ SOFTWARE.
 import numpy as np
 import cv2
 
-def estimateReprojectionErrorDistortion(K, extrinsic, imgpoints, objpoints):
+
+def estimateReprojectionErrorDistortion(calib_matrix, extrinsic, imgpoints, objpoints):
     err = []
     reproject_points = []
 
-    u0, v0 = K[0, 2], K[1, 2]
+    u0, v0 = calib_matrix[0, 2], calib_matrix[1, 2]
 
     for impt, objpt in zip(imgpoints, objpoints):
         model = np.array([[objpt[0]], [objpt[1]], [0], [1]])
@@ -41,7 +42,7 @@ def estimateReprojectionErrorDistortion(K, extrinsic, imgpoints, objpoints):
         proj_point = proj_point / proj_point[2]
         x, y = proj_point[0], proj_point[1]
 
-        U = np.dot(K, proj_point)
+        U = np.dot(calib_matrix, proj_point)
         U = U / U[2]
         u, v = U[0], U[1]
         k1 = 0.04909
@@ -55,16 +56,3 @@ def estimateReprojectionErrorDistortion(K, extrinsic, imgpoints, objpoints):
         err.append(np.sqrt((impt[0] - u_cap) ** 2 + (impt[1] - v_cap) ** 2))
 
     return np.mean(err), reproject_points
-
-
-def visualizePoints(imgpoints, optpoints, image,number):
-
-    img = cv2.imread(image)
-    for i in imgpoints:
-        x = i[0]
-        y = i[1]
-        # x_correct = optpoints[i][0]
-        # y_correct = optpoints[i][1]
-        cv2.rectangle(img, (x - 5, y - 5), (x + 5, y + 5), (0, 0, 255), -1)
-        #cv2.rectangle(img, (x_correct - 5, y_correct - 5), (x_correct + 5, y_correct + 5), (0, 255, 0), -1)
-        cv2.imwrite("Output/reproj_{}.jpg".format(number), img)

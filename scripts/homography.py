@@ -58,8 +58,6 @@ def compute_view_based_homography(correspondence):
 
     # de normalize equation 68 of Burger – Zhang’s Camera Calibration Algorithm
     h = np.matmul(np.matmul(N_u_inv, h_norm), N_x)
-
-    # if abs(h[2, 2]) > 10e-8:
     h = h[:, :] / h[2, 2]
 
     reprojection_error = 0

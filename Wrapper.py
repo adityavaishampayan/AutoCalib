@@ -31,9 +31,11 @@ from scripts.homography import compute_view_based_homography
 from scripts.homography_refined import h_refined
 from scripts.camera_intrinsic_param import get_intrinsic_parameters
 from scripts.camera_extrinsic_param import estimateExtrinsicParams
-from scripts.approx_distortion import *
-import glob
+from scripts.approx_distortion import estimateReprojectionErrorDistortion
+from scripts.visualisation import visualize_pts
 
+import glob
+import numpy as np
 
 def main():
 
@@ -77,7 +79,7 @@ def main():
     images = sorted(images)
     for i in range(len(optpoints)):
         image_points, object_points = chessboard_correspondences[i]
-        visualizePoints(image_points, optpoints, images[i],i)
+        visualize_pts(image_points, optpoints, images[i], i)
 
 
 if __name__ == '__main__':

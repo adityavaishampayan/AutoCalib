@@ -20,7 +20,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-# @file    non_linear_optimization.py
+# @file    visualisation.py
 # @Author  Aditya Vaishampayan (adityavaishampayan)
 # @copyright  MIT
-# @brief file for non linear geometric error minimization using scipy optimization
+# @brief file for outputting the rectified images
+
+import cv2
+
+def visualize_pts(imgpoints, optpoints, image, number):
+    """
+    a function to visualize the reporjected points
+    :param imgpoints: image points
+    :param optpoints: output points
+    :param image: image
+    :param number: image number
+    """
+    img = cv2.imread(image)
+    for i in imgpoints:
+        x = i[0]
+        y = i[1]
+        # x_correct = optpoints[i][0]
+        # y_correct = optpoints[i][1]
+        cv2.rectangle(img, (x - 5, y - 5), (x + 5, y + 5), (0, 0, 255), -1)
+        # cv2.rectangle(img, (x_correct - 5, y_correct - 5), (x_correct + 5, y_correct + 5), (0, 255, 0), -1)
+        cv2.imwrite("Output/reproj_{}.jpg".format(number), img)
