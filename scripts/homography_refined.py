@@ -28,23 +28,30 @@ SOFTWARE.
 import numpy as np
 from scipy import optimize as opt
 
-from scripts.jacobian import jac_function
-from scripts.minimizer import minimizer_func
+from scripts.jacobian import func_jacobian
+from scripts.minimizer import func_minimize
 
 
-def refine_homographies(H, correspondences, skip=False):
-    if skip:
-        return H
-
-    image_points = correspondences[0]
-    object_points = correspondences[1]
-    normalized_object_points = correspondences[3]
-
-    N = normalized_object_points.shape[0]
-    X = object_points.flatten()
-    Y = image_points.flatten()
+def h_refined(H, correspondences):
+    """
+    a function to return the refined homography
+    :param H: homography matrix
+    :param correspondences: coreesponding points
+    :return: refined homography matrix
+    """
+    # flateening the h matrix
     h = H.flatten()
-    h_prime = opt.least_squares(fun=minimizer_func, x0=h, jac=jac_function, method="lm", args=[X, Y, h, N], verbose=0)
+    # flattening the image points
+    img_points = correspondences[0]
+    y = img_points.flatten()
+    # flattening the objects points
+    obj_points = correspondences[1]
+    X = obj_points.flatten()
+    # normalised object points
+    norm_obj_points = correspondences[3]
+    n = norm_obj_points.shape[0]
+
+    h_prime = opt.least_squares(fun=func_minimize, x0=h, jac=func_jacobian, method="lm", args=[X, y, h, n], verbose=0)
 
     if h_prime.success:
         H = h_prime.x.reshape(3, 3)

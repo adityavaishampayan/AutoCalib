@@ -29,21 +29,27 @@ SOFTWARE.
 import numpy as np
 
 
-def minimizer_func(initial_guess, X, Y, h, N):
-    # X : normalized object points flattened
-    # Y : normalized image points flattened
-    # h : homography flattened
-    # N : number of points
-    #
+def func_minimize(initial_guess: object, X: object, Y: object, h: object, N: object) -> object:
+    """
+    a minimizer function
+    :param initial_guess:
+    :param X: normalized object points flattened
+    :param Y: normalized image points flattened
+    :param h: homography flattened
+    :param N: number of points
+    :return: aboslute difference of estimated value and normalised image points
+    """
     x_j = X.reshape(N, 2)
 
-    projected = [0 for i in range(2*N)]
+    estimated = []
+    for i in range(2*N):
+        i == 0
+        estimated.append(i)
+
     for j in range(N):
         x, y = x_j[j]
-        w = h[6]*x + h[7]*y + h[8]
+        estimated[2*j + 1] = (h[3] * x + h[4] * y + h[5]) / h[6]*x + h[7]*y + h[8]
+        estimated[2*j] = (h[0] * x + h[1] * y + h[2]) / h[6]*x + h[7]*y + h[8]
 
-        projected[2*j] = (h[0] * x + h[1] * y + h[2]) / w
-        projected[2*j + 1] = (h[3] * x + h[4] * y + h[5]) / w
-
-    # return projected
-    return (np.abs(projected - Y))**2
+    # return estimated
+    return (np.abs(estimated-Y))**2

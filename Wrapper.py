@@ -28,7 +28,7 @@ SOFTWARE.
 from scripts.chess_board_corners import getChessboardCorners
 from scripts.normalise_coorespondances import normalize_points
 from scripts.homography import compute_view_based_homography
-from scripts.homography_refined import refine_homographies
+from scripts.homography_refined import h_refined
 from scripts.camera_intrinsic_param import get_intrinsic_parameters
 
 
@@ -48,7 +48,7 @@ def main():
     # refining the obtsined homography
     homography_refined = []
     for i in range(len(homography)):
-        h_opt = refine_homographies(homography[i], chessboard_correspondences_normalized[i], skip=False)
+        h_opt = h_refined(homography[i], chessboard_correspondences_normalized[i])
         homography_refined.append(h_opt)
 
     # obtaining the calibration matrix

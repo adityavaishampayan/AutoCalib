@@ -27,15 +27,16 @@ SOFTWARE.
 
 import numpy as np
 
-def jac_function(initial_guess, X, Y, h, N):
+
+def func_jacobian(initial_guess, X, Y, h, N):
     x_j = X.reshape(N, 2)
     jacobian = np.zeros( (2*N, 9) , np.float64)
     for j in range(N):
         x, y = x_j[j]
-        sx = np.float64(h[0]*x + h[1]*y + h[2])
-        sy = np.float64(h[3]*x + h[4]*y + h[5])
+        s_x = np.float64(h[0]*x + h[1]*y + h[2])
+        s_y = np.float64(h[3]*x + h[4]*y + h[5])
         w = np.float64(h[6]*x + h[7]*y + h[8])
-        jacobian[2*j] = np.array([x/w, y/w, 1/w, 0, 0, 0, -sx*x/w**2, -sx*y/w**2, -sx/w**2])
-        jacobian[2*j + 1] = np.array([0, 0, 0, x/w, y/w, 1/w, -sy*x/w**2, -sy*y/w**2, -sy/w**2])
+        jacobian[2*j] = np.array([x/w, y/w, 1/w, 0, 0, 0, -s_x*x/w**2, -s_x*y/w**2, -s_x/w**2])
+        jacobian[2*j + 1] = np.array([0, 0, 0, x/w, y/w, 1/w, -s_y*x/w**2, -s_y*y/w**2, -s_y/w**2])
 
     return jacobian
